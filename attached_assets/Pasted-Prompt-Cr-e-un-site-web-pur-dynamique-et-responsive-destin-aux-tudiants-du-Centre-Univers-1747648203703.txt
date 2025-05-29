@@ -1,0 +1,58 @@
+Prompt :
+
+Crée un site web épuré, dynamique et responsive, destiné aux étudiants du Centre Universitaire de Lokossa (CUL), nommé CULIB. Le site doit être en français uniquement, avec un mode clair et un mode sombre.
+
+Objectif du site :
+Proposer une banque d’épreuves en PDF accessibles facilement selon une structure claire et intuitive :
+Entité > Département > Filière > Année (1ère, 2e, 3e année).
+Chaque département doit inclure une filière "Tronc commun" en plus des filières spécifiques.
+
+Entités du site :
+ENSET (École Normale Supérieure de l’Enseignement Technique)
+Départements :
+
+STI (Sciences et Techniques Industrielles) : MA, FM, GC, ELT, ELE, ER, FC
+
+STA (Sciences et Techniques Agricoles) : PA, PV
+
+STAG (Sciences et Techniques Administratives et de Gestion) : ECO, CG, SAG
+
+STBASS (Sciences et Techniques Biologiques Appliquées et Sciences Sociales) : HR, MMV, EFS
+
+INSTI (Institut National des Sciences et Techniques Industrielles)
+Départements :
+
+Génie Énergétique (GE) : FC, ER
+
+Génie Civil (GC) : GC
+
+Maintenance des Systèmes (MSY) : MI, MA
+
+Génie Électrique et Informatique (GEI) : IT, ELE, ELT
+
+Génie Mécanique et Productique (GMP) : GMP
+
+Pages principales :
+Accueil (présentation du CUL, de l’UNSTIM et de l’objectif du site)
+
+À propos
+
+Équipe (2 profils avec photo, nom, bio, contact, réseaux sociaux)
+
+Entités (navigation par entité > département > filière > année)
+
+Fonctionnalités clés :
+Téléchargement direct des épreuves en PDF
+
+Barre de recherche puissante (mots-clés, matières, intitulés)
+
+Système de filtrage (par entité, département, filière, année)
+
+Espace administrateur simple et sécurisé pour ajouter ou modifier les épreuves
+
+Responsive design pour mobile et ordinateur
+
+Mode sombre / clair activable
+
+Utilise un design moderne, minimaliste, avec des couleurs sobres mais dynamiques, adapté à un public étudiant.
+Structure propre du code, avec possibilité de mise à jour facile. Utilise HTML/CSS/JS avec éventuellement un framework léger comme Bootstrap ou Tailwind CSS.
