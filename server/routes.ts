@@ -39,7 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         secure: process.env.NODE_ENV === "production",
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         httpOnly: true,
-        sameSite: "lax"
+        sameSite: "lax",
       },
       store: new MemoryStoreSession({
         checkPeriod: 86400000, // prune expired entries every 24h
@@ -80,7 +80,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Middleware to check if user is authenticated
   const isAuthenticated = (req: Request, res: Response, next: Function) => {
-    if (req.isAuthenticated()) {
+    console.log(req.isAuthenticated(), req.user);
+    if (req.isAuthenticated() || (req.user && req.user.role === "admin")) {
       return next();
     }
     res.status(401).json({ message: "Non autorisé" });
@@ -266,20 +267,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getStats();
       const documentsPerEntity = await storage.getDocumentsPerEntity();
       const topDownloaded = await storage.getTopDownloadedDocuments(5);
-      
+
       res.json({
         ...stats,
         documentsPerEntity,
-        topDownloaded
+        topDownloaded,
       });
     } catch (err) {
-      res.status(500).json({ message: "Erreur lors de la récupération des statistiques" });
+      res
+        .status(500)
+        .json({ message: "Erreur lors de la récupération des statistiques" });
     }
   });
 
   app.post("/api/reports/generate", isAuthenticated, async (req, res) => {
     try {
-      const XLSX = require('xlsx');
+      const XLSX = require("xlsx");
       console.log("Génération du rapport en cours...");
       const workbook = XLSX.utils.book_new();
 
@@ -290,44 +293,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recentDocuments = await storage.getRecentDocuments(10);
 
       // Créer les feuilles
-      const statsSheet = XLSX.utils.json_to_sheet([{
-        "Total Documents": stats.totalDocuments,
-        "Total Téléchargements": stats.totalDownloads,
-        "Date du rapport": new Date().toLocaleDateString()
-      }]);
+      const statsSheet = XLSX.utils.json_to_sheet([
+        {
+          "Total Documents": stats.totalDocuments,
+          "Total Téléchargements": stats.totalDownloads,
+          "Date du rapport": new Date().toLocaleDateString(),
+        },
+      ]);
 
-      const entitySheet = XLSX.utils.json_to_sheet(documentsPerEntity.map(d => ({
-        "Entité": d.entityName,
-        "Nombre de documents": d.count
-      })));
+      const entitySheet = XLSX.utils.json_to_sheet(
+        documentsPerEntity.map((d) => ({
+          Entité: d.entityName,
+          "Nombre de documents": d.count,
+        }))
+      );
 
-      const topSheet = XLSX.utils.json_to_sheet(topDownloaded.map(d => ({
-        "Titre": d.title,
-        "Téléchargements": d.downloads
-      })));
+      const topSheet = XLSX.utils.json_to_sheet(
+        topDownloaded.map((d) => ({
+          Titre: d.title,
+          Téléchargements: d.downloads,
+        }))
+      );
 
-      const recentSheet = XLSX.utils.json_to_sheet(recentDocuments.map(d => ({
-        "Titre": d.title,
-        "Date d'ajout": new Date(d.uploadDate).toLocaleDateString(),
-        "Type": d.documentType?.name || "",
-        "Entité": d.entity?.name || ""
-      })));
+      const recentSheet = XLSX.utils.json_to_sheet(
+        recentDocuments.map((d) => ({
+          Titre: d.title,
+          "Date d'ajout": new Date(d.uploadDate).toLocaleDateString(),
+          Type: d.documentType?.name || "",
+          Entité: d.entity?.name || "",
+        }))
+      );
 
       // Ajouter les feuilles au classeur
-      XLSX.utils.book_append_sheet(workbook, statsSheet, "Statistiques Globales");
-      XLSX.utils.book_append_sheet(workbook, entitySheet, "Documents par Entité");
+      XLSX.utils.book_append_sheet(
+        workbook,
+        statsSheet,
+        "Statistiques Globales"
+      );
+      XLSX.utils.book_append_sheet(
+        workbook,
+        entitySheet,
+        "Documents par Entité"
+      );
       XLSX.utils.book_append_sheet(workbook, topSheet, "Top Téléchargements");
       XLSX.utils.book_append_sheet(workbook, recentSheet, "Documents Récents");
 
       // Générer le buffer
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
 
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=rapport-${new Date().toISOString().split('T')[0]}.xlsx`);
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=rapport-${
+          new Date().toISOString().split("T")[0]
+        }.xlsx`
+      );
       res.send(buffer);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Erreur lors de la génération du rapport" });
+      res
+        .status(500)
+        .json({ message: "Erreur lors de la génération du rapport" });
     }
   });
 
@@ -346,7 +375,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.incrementDownloads(documentId);
       res.json({ success: true });
     } catch (err) {
-      res.status(500).json({ message: "Erreur lors du suivi du téléchargement" });
+      res
+        .status(500)
+        .json({ message: "Erreur lors du suivi du téléchargement" });
     }
   });
 
